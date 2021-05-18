@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SecureDoor.Models.Response;
-
 namespace SecureDoor.Controllers
 {
     [ApiController]
     [Route("[controller]/api")]
-    pubic class DoorController : ControllerBase
+    public class DoorController : ControllerBase
     {
         private readonly ILogger<DoorController> _logger;
 
