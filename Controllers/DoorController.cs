@@ -5,7 +5,7 @@ using SecureDoor.Models.Response;
 namespace SecureDoor.Controllers
 {
     [ApiController]
-    [Route("[controller]/api")]
+    [Route("/api/[controller]")]
     public class DoorController : ControllerBase
     {
         private readonly ILogger<DoorController> _logger;
