@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
+using SecureDoor.Data;
+using SecureDoor.Models.Request;
 using SecureDoor.Models.Response;
 namespace SecureDoor.Controllers
 {
@@ -9,23 +13,38 @@ namespace SecureDoor.Controllers
     public class DoorController : ControllerBase
     {
         private readonly ILogger<DoorController> _logger;
+        private readonly IDoorRepository _repository;
 
-        public DoorController(ILogger<DoorController> logger)
+        public DoorController(ILogger<DoorController> logger,
+                              IDoorRepository repository)
         {
             _logger = logger;
+            _repository = repository;
         }
 
         [HttpGet]
         [Route("{doorId}")]
-        public DoorState Get(Guid doorId)
+        public async Task<IActionResult> Get(string doorId)
         {
-            return new DoorState
+            var result = await _repository.Get(ObjectId.Parse(doorId));
+
+            if (result == null)
+                return NotFound();
+
+            return new JsonResult(new Door
             {
-                Id = Guid.NewGuid(),
-                DoorId = doorId,
+                Id = doorId,
                 UpdatedAt = DateTime.UtcNow,
                 Locked = true
-            };
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateDoor door)
+        {
+            var createdDoorId = await _repository.Create(door.DoorName);
+
+            return new JsonResult(createdDoorId.ToString());
         }
     }
 }
