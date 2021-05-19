@@ -2,10 +2,11 @@ using System;
 
 namespace SecureDoor.Models.Response
 {
-    public class DoorState
+    public class Door
     {
-        public Guid Id { get; set; }
-        public Guid DoorId { get; set; }
+        public string Id { get; set; }
+        public string DoorName { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool Locked { get; set; }
     }
