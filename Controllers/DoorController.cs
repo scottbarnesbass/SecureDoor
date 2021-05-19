@@ -33,9 +33,11 @@ namespace SecureDoor.Controllers
 
             return new JsonResult(new Door
             {
-                Id = doorId,
+                Id = result.Id.ToString(),
+                DoorName = result.DoorName,
+                CreatedAt = result.CreatedAt,
                 UpdatedAt = DateTime.UtcNow,
-                Locked = true
+                Locked = result.Locked
             });
         }
 
