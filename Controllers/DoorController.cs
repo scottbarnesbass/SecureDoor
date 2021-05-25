@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -26,7 +27,10 @@ namespace SecureDoor.Controllers
         [Route("{doorId}")]
         public async Task<IActionResult> Get(string doorId)
         {
-            var result = await _repository.Get(ObjectId.Parse(doorId));
+            if (!ObjectId.TryParse(doorId, out var doorObjectId))
+                return BadRequest();
+
+            var result = await _repository.Get(doorObjectId);
 
             if (result == null)
                 return NotFound();
@@ -36,8 +40,8 @@ namespace SecureDoor.Controllers
                 Id = result.Id.ToString(),
                 DoorName = result.DoorName,
                 CreatedAt = result.CreatedAt,
-                UpdatedAt = DateTime.UtcNow,
-                Locked = result.Locked
+                UpdatedAt = result.UpdatedAt,
+                IsLocked = result.IsLocked
             });
         }
 
@@ -47,6 +51,30 @@ namespace SecureDoor.Controllers
             var createdDoorId = await _repository.Create(door.DoorName);
 
             return new JsonResult(createdDoorId.ToString());
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateDoor doorUpdate)
+        {
+            if (!ObjectId.TryParse(doorUpdate.Id, out var doorObjectId))
+                return BadRequest();
+
+            var repositoryDoor = await _repository.Get(doorObjectId);
+
+            if (repositoryDoor == null)
+                return NotFound();
+
+            if (!await _repository.Update(new Data.Models.Door
+            {
+                Id = repositoryDoor.Id,
+                DoorName = repositoryDoor.DoorName,
+                CreatedAt = repositoryDoor.CreatedAt,
+                UpdatedAt = DateTime.UtcNow,
+                IsLocked = doorUpdate.IsLocked
+            }))
+                return StatusCode(StatusCodes.Status500InternalServerError);
+
+            return Ok();
         }
     }
 }
