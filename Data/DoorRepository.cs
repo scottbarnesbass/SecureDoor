@@ -23,7 +23,7 @@ namespace SecureDoor.Data
                 DoorName = doorName,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                Locked = false
+                IsLocked = false
             };
 
             await _doors.InsertOneAsync(newDoor);
@@ -41,7 +41,7 @@ namespace SecureDoor.Data
         {
             var filter = Builders<Door>.Filter.Eq(d => d.Id, door.Id);
             var update = Builders<Door>.Update
-                                       .Set(d => d.Locked, door.Locked)
+                                       .Set(d => d.IsLocked, door.IsLocked)
                                        .Set(d => d.UpdatedAt, door.UpdatedAt);
 
             var result = await _doors.UpdateOneAsync(filter, update);

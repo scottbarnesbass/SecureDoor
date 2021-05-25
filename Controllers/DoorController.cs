@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -40,7 +41,7 @@ namespace SecureDoor.Controllers
                 DoorName = result.DoorName,
                 CreatedAt = result.CreatedAt,
                 UpdatedAt = result.UpdatedAt,
-                Locked = result.Locked
+                IsLocked = result.IsLocked
             });
         }
 
@@ -50,6 +51,30 @@ namespace SecureDoor.Controllers
             var createdDoorId = await _repository.Create(door.DoorName);
 
             return new JsonResult(createdDoorId.ToString());
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateDoor doorUpdate)
+        {
+            if (!ObjectId.TryParse(doorUpdate.Id, out var doorObjectId))
+                return BadRequest();
+
+            var repositoryDoor = await _repository.Get(doorObjectId);
+
+            if (repositoryDoor == null)
+                return NotFound();
+
+            if (!await _repository.Update(new Data.Models.Door
+            {
+                Id = repositoryDoor.Id,
+                DoorName = repositoryDoor.DoorName,
+                CreatedAt = repositoryDoor.CreatedAt,
+                UpdatedAt = DateTime.UtcNow,
+                IsLocked = doorUpdate.IsLocked
+            }))
+                return StatusCode(StatusCodes.Status500InternalServerError);
+
+            return Ok();
         }
     }
 }
