@@ -26,7 +26,10 @@ namespace SecureDoor.Controllers
         [Route("{doorId}")]
         public async Task<IActionResult> Get(string doorId)
         {
-            var result = await _repository.Get(ObjectId.Parse(doorId));
+            if (!ObjectId.TryParse(doorId, out var doorObjectId))
+                return BadRequest();
+
+            var result = await _repository.Get(doorObjectId);
 
             if (result == null)
                 return NotFound();
@@ -36,7 +39,7 @@ namespace SecureDoor.Controllers
                 Id = result.Id.ToString(),
                 DoorName = result.DoorName,
                 CreatedAt = result.CreatedAt,
-                UpdatedAt = DateTime.UtcNow,
+                UpdatedAt = result.UpdatedAt,
                 Locked = result.Locked
             });
         }
